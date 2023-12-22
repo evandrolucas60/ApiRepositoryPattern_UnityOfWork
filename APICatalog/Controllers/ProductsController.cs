@@ -1,8 +1,6 @@
-﻿using APICatalog.Context;
-using APICatalog.Models;
+﻿using APICatalog.Models;
 using APICatalog.Repository;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace APICatalog.Controllers
 {
