@@ -1,6 +1,6 @@
 using APICatalog.Context;
+using APICatalog.Repository;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Cryptography.Xml;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,6 +15,8 @@ options.JsonSerializerOptions
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 var connectionString = builder.Configuration.GetConnectionString("ApplicationDbContextConnection");
 
