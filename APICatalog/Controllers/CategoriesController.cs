@@ -1,6 +1,8 @@
 ﻿using APICatalog.Context;
+using APICatalog.DTOs;
 using APICatalog.Models;
 using APICatalog.Repository;
+using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -12,27 +14,34 @@ namespace APICatalog.Controllers
     public class CategoriesController : ControllerBase
     {
         private readonly IUnitOfWork _uow;
+        private readonly IMapper _mapper;
 
-        public CategoriesController(IUnitOfWork context)
+        public CategoriesController(IUnitOfWork context, IMapper mapper)
         {
             _uow = context;
+            _mapper = mapper;
         }
 
         [HttpGet("produtos")]
-        public ActionResult<IEnumerable<Category>> GetCategoriesProducts()
+        public ActionResult<IEnumerable<CategoryDTO>> GetCategoriesProducts()
         {
             //return _context.Categories.Include(p => p.Products).AsNoTracking().ToList();
-            return _uow.CategoryRepository.GetCategoriesProducts().ToList();
+            var categories = _uow.CategoryRepository.GetCategoriesProducts().ToList();
+            var categoriesDto = _mapper.Map<List<CategoryDTO>>(categories);
+
+            return categoriesDto;
         }
 
         [HttpGet]
-        public ActionResult<IEnumerable<Category>> Get()
+        public ActionResult<IEnumerable<CategoryDTO>> Get()
         {
-            return _uow.CategoryRepository.Get().ToList(); 
+            var categories = _uow.CategoryRepository.Get().ToList();
+            var categoriesDto = _mapper.Map<List<CategoryDTO>>(categories);
+            return categoriesDto; 
         }
 
         [HttpGet("{id:int}", Name = "ObterCategoria")]
-        public ActionResult<Category> Get(int id)
+        public ActionResult<CategoryDTO> Get(int id)
         {
             var category = _uow.CategoryRepository.GetById(c => c.CategoryId == id);
 
@@ -40,22 +49,29 @@ namespace APICatalog.Controllers
             {
                 return NotFound("Categoria não encontrada");
             }
-            
-            return category;
+            var categoriesDto = _mapper.Map<CategoryDTO>(category);
+            return categoriesDto;
         }
 
         [HttpPost]
-        public ActionResult Post(Category category)
+        public ActionResult Post(CategoryDTO categoryDto)
         {
+            var category = _mapper.Map<Category>(categoryDto);
+
             _uow.CategoryRepository.Add(category);
             _uow.Commit();
+
+            var categoryDTO = _mapper.Map<CategoryDTO>(category);
+
             return new CreatedAtRouteResult("ObterCategoria",
-                new { id = category.CategoryId }, category);
+                new { id = category.CategoryId }, categoryDTO);
         }
 
         [HttpPut("{id}:int")]
-        public ActionResult Put(int id, Category category)
+        public ActionResult Put(int id, CategoryDTO categoryDto)
         {
+            var category = _mapper.Map<Category>(categoryDto);
+
             _uow.CategoryRepository.Update(category);
             _uow.Commit();
 
@@ -64,7 +80,7 @@ namespace APICatalog.Controllers
 
 
         [HttpDelete("{id:int}")]
-        public ActionResult<Category> Delete(int id)
+        public ActionResult<CategoryDTO> Delete(int id)
         {
             var category = _uow.CategoryRepository.GetById(p => p.CategoryId == id);
 
@@ -73,7 +89,9 @@ namespace APICatalog.Controllers
             _uow.CategoryRepository.Delete(category);
             _uow.Commit();
 
-            return category;
+            var categoryDto = _mapper.Map<CategoryDTO>(category);
+
+            return categoryDto;
         }
     }
 }
